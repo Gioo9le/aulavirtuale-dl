@@ -43,6 +43,7 @@ for (date, meetId) in meetingsID.items():
     imgSorted = sorted(usefulImg)
     print(imgSorted)
     if(len(imgSorted)==0):
+        os.rename(f"Gestione{date}joined.mp4", f"Gestione{date}joinedWithSlide.mp4")
         continue
 
     slideBase = f"{edunovaLink}{meetId}/"
