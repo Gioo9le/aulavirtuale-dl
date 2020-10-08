@@ -22,8 +22,11 @@ meetingsID = {
     '061020': '17d59e4eb742c498e605406fd441c1a2d7eb4bf0-1601984780753'
             }
 
+
+
 for (date, meetId) in meetingsID.items():
     if(os.path.exists(f"Gestione{date}joinedWithSlide.mp4")):
+        print("Il video e' gia' stato scaricato")
         continue
 
     #Assemblo il comando ffmpeg con i riferimenti web a video e audio della presentazione con id {meetId}
