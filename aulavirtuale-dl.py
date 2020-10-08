@@ -22,13 +22,13 @@ meetingsID = {
             }
 
 for (date, meetId) in meetingsID.items():
-    if(os.path.exists(f"Gestione{date}joinedWithSlide.mp4")):
+    if(os.path.exists("Gestione" +date+ "joinedWithSlide.mp4")):
         continue
 
     #Assemblo il comando ffmpeg con i riferimenti web a video e audio della presentazione con id {meetId}
-    downloadAndJoin = f"ffmpeg -i {edunovaLink}{meetId}{videoSuffix} -i {edunovaLink}{meetId}{audioSuffix} -map 0:v -map 1:a -c:v copy -shortest Gestione{date}joined.mp4"
+    downloadAndJoin = "ffmpeg -i "+edunovaLink+meetId+videoSuffix+" -i "+edunovaLink+meetId+audioSuffix+" -map 0:v -map 1:a -c:v copy -shortest Gestione"+date+"joined.mp4"
     os.system(downloadAndJoin)
-    svgSlide = urllib.request.urlopen(f"{edunovaLink}{meetId}/shapes.svg").read()
+    svgSlide = urllib.request.urlopen(edunovaLink+meetId+"/shapes.svg").read()
 
     soup = BeautifulSoup(svgSlide, 'html.parser')
     usefulImg = []
@@ -43,25 +43,25 @@ for (date, meetId) in meetingsID.items():
     imgSorted = sorted(usefulImg)
     print(imgSorted)
     if(len(imgSorted)==0):
-        os.rename(f"Gestione{date}joined.mp4", f"Gestione{date}joinedWithSlide.mp4")
+        os.rename(f"Gestione"+date+"joined.mp4", "Gestione"+date+"joinedWithSlide.mp4")
         continue
 
-    slideBase = f"{edunovaLink}{meetId}/"
+    slideBase = edunovaLink+meetId+"/"
 
     imgLinkList = ''
     imgScaleList = ''
     for l in imgSorted:
-        imgLinkList += f"-i \"{slideBase}{l[2]}\" "
+        imgLinkList += "-i \""+slideBase+l[2]+"\" "
 
     for i in range(len(imgSorted)):
-        imgScaleList += f"[{i+1}:v] scale=1280:720 [ol{i}]; "
+        imgScaleList += "["+str(i+1)+":v] scale=1280:720 [ol"+str(i)+"]; "
 
-    imgOverlayList = f"[0:v] [ol0] overlay=0:0:enable='between(t,{int(imgSorted[0][0])},{int(imgSorted[0][1])})' [olo0]; "
+    imgOverlayList = f"[0:v] [ol0] overlay=0:0:enable='between(t,"+str(int(imgSorted[0][0]))+","+str(int(imgSorted[0][1]))+")' [olo0]; "
 
     for i in range(1, len(imgSorted)-1):
-        imgOverlayList += f"[olo{i-1}] [ol{i}] overlay=0:0:enable='between(t,{int(imgSorted[i][0])},{int(imgSorted[i][1])})' [olo{i}]; "
+        imgOverlayList += "[olo"+str(i-1)+"] [ol"+str(i)+"] overlay=0:0:enable='between(t,"+str(int(imgSorted[i][0]))+","+str(int(imgSorted[i][1]))+")' [olo"+str(i)+"]; "
 
-    imgOverlayList += f"[olo{len(imgSorted)-1-1}] [ol{len(imgSorted)-1}] overlay=0:0:enable='between(t,{int(imgSorted[len(imgSorted)-1][0])},{int(imgSorted[len(imgSorted)-1][1])})'"
+    imgOverlayList += "[olo"+str(len(imgSorted)-1-1)+"] [ol"+str(len(imgSorted)-1)+"] overlay=0:0:enable='between(t,"+str(int(imgSorted[len(imgSorted)-1][0]))+","+str(int(imgSorted[len(imgSorted)-1][1]))+")'"
     
     #Informazioni di debug sulle immagini e sui momenti nei quali inserirle nel video
     print(imgLinkList)
@@ -71,8 +71,8 @@ for (date, meetId) in meetingsID.items():
     #Comando di esempio di utilizzo di ffmpeg per incollare diverse immagini in diversi momenti su un video
     #ffmpeg -i Untitled.mp4 -i slide-1.png -i slide-2.png -filter_complex "[1:v] scale=640:480 [ol]; [2:v] scale=640:480 [ol2]; [0:v] [ol] overlay=0:0:enable='between(t,0,20)' [ol1]; [ol1] [ol2] overlay=0:0:enable='between(t, 30,40)'" -codec:a copy example_marked.mp4
 
-    ffmpegCommand = f'ffmpeg -i Gestione{date}joined.mp4 {imgLinkList} -filter_complex "{imgScaleList}{imgOverlayList}" -codec:a copy Gestione{date}joinedWithSlide.mp4'
+    ffmpegCommand = 'ffmpeg -i Gestione'+date+'joined.mp4 '+imgLinkList+' -filter_complex "'+imgScaleList+imgOverlayList+'" -codec:a copy Gestione'+date+'joinedWithSlide.mp4'
 
     os.system(ffmpegCommand)
     #Rimuovo il file intermedio senza slide
-    os.remove(f"Gestione{date}joined.mp4")
+    os.remove(f"Gestione"+date+"joined.mp4")
